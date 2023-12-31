@@ -31,3 +31,39 @@ BEGIN
 	WHERE [uid] IN (SELECT DISTINCT [uid] FROM inserted)
 END
 GO
+
+CREATE TRIGGER trg2_FigurePriceTracker ON NewListings
+AFTER INSERT
+AS
+BEGIN
+	INSERT INTO FigurePriceTracker ([jan_code], [store_id], [check_date], [currency_code], [price])
+		SELECT [jan_code], [store_id], [recent_check_date], [currency_code], [price] FROM inserted
+END
+GO
+
+CREATE TRIGGER trg3_FigurePriceTracker ON NewListings
+AFTER UPDATE
+AS
+BEGIN
+	INSERT INTO FigurePriceTracker ([jan_code], [store_id], [check_date], [currency_code], [price])
+		SELECT [jan_code], [store_id], [recent_check_date], [currency_code], [price] FROM inserted
+END
+GO
+
+CREATE TRIGGER trg4_FigurePriceTracker ON PreownedListings
+AFTER INSERT
+AS
+BEGIN
+	INSERT INTO FigurePriceTracker ([jan_code], [store_id], [check_date], [currency_code], [price])
+		SELECT [jan_code], [store_id], [recent_check_date], [currency_code], [price] FROM inserted
+END
+GO
+
+CREATE TRIGGER trg5_FigurePriceTracker ON PreownedListings
+AFTER UPDATE
+AS
+BEGIN
+	INSERT INTO FigurePriceTracker ([jan_code], [store_id], [check_date], [currency_code], [price])
+		SELECT [jan_code], [store_id], [recent_check_date], [currency_code], [price] FROM inserted
+END
+GO

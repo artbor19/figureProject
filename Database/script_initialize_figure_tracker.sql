@@ -139,6 +139,7 @@ CREATE TABLE NewListings (
 	[store_id] INT FOREIGN KEY REFERENCES Stores ([store_id]),
 	[currency_code] CHAR(3) NOT NULL,
 	[price] DECIMAL(19,4) NOT NULL,
+	[is_preorder] BIT DEFAULT 0,
 	[is_available] BIT DEFAULT 0,
 	[is_limited_edition] BIT DEFAULT 0,
 	[recent_check_date] DATETIME DEFAULT GETDATE(),

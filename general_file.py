@@ -183,6 +183,7 @@ def new_listing_table():
     display(figure_df)
     driver.close()
 
+    #Configured to Artur's local machine, must be modified (Server) to work with local machine on trusted connection i.e. localhost
     params = urllib.parse.quote_plus(
         "DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-QLGCSG7;DATABASE=figure_tracker;Trusted_Connection=yes;Encrypt=no;")
     engine = create_engine('mssql+pyodbc:///?odbc_connect={}'.format(params))

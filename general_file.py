@@ -1,5 +1,6 @@
 #AmiAmi data mining branch
 
+from tabulate import tabulate
 from Tools.scripts.dutree import display
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -168,7 +169,6 @@ def parse_new_page(driver, df):
 
 
 def new_listing_table():
-    newListingDF = pd.DataFrame()
 
     driver = webdriver.Chrome()
     driver.get(
@@ -186,7 +186,8 @@ def new_listing_table():
         nextPage.click()
         time.sleep(3)
         new_figure_df = parse_new_page(driver, new_figure_df)
-    display(new_figure_df)
+
+    print(tabulate(new_figure_df, headers = 'keys', tablefmt = 'psql'))
     driver.close()
 
     params = urllib.parse.quote_plus(
@@ -194,7 +195,7 @@ def new_listing_table():
     engine = create_engine('mssql+pyodbc:///?odbc_connect={}'.format(params))
     new_figure_df.to_sql('NewListings', engine, if_exists='append', index=False)
 
-# new_listing_table()
+new_listing_table()
 
 def parse_used_page(driver, df):
     matching_params = driver.find_element(By.CLASS_NAME, 'new-items__inner')
@@ -295,7 +296,8 @@ def used_listing_table():
         nextPage.click()
         time.sleep(3)
         used_figure_df = parse_used_page(driver, used_figure_df)
-    display(used_figure_df)
+
+    print(tabulate(used_figure_df, headers = 'keys', tablefmt = 'psql'))
     driver.close()
 
     params = urllib.parse.quote_plus(
@@ -304,7 +306,7 @@ def used_listing_table():
     used_figure_df.to_sql('PreownedListings', engine, if_exists='append', index=False)
 
 
-used_listing_table()
+#used_listing_table()
 
 
 

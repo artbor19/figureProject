@@ -164,6 +164,9 @@ def parse_new_page(driver, df):
         driver.switch_to.window(driver.window_handles[0])
         time.sleep(0.5)
 
+        if len(figure['jan_code']) < 1:
+            continue
+
         df = pd.concat([df, pd.DataFrame([figure])], ignore_index=True)
     return df
 
@@ -196,6 +199,7 @@ def new_listing_table():
     new_figure_df.to_sql('NewListings', engine, if_exists='append', index=False)
 
 new_listing_table()
+
 
 def parse_used_page(driver, df):
     matching_params = driver.find_element(By.CLASS_NAME, 'new-items__inner')
@@ -264,14 +268,17 @@ def parse_used_page(driver, df):
                 other_listing = o.find_element(By.CLASS_NAME, 'buying-choices-contents__list_price').text.split('\n')
                 sub_figure['price'] = float(other_listing[0].replace(',', '').replace('JPY', ''))
                 sub_figure['condition'] = other_listing[1].replace('Condition', '').split('Box')[0].strip()
-
-                df = pd.concat([df, pd.DataFrame([sub_figure])], ignore_index=True)
+                if len(figure['jan_code']) > 1:
+                    df = pd.concat([df, pd.DataFrame([sub_figure])], ignore_index=True)
         except:
             None
 
         driver.close()
         driver.switch_to.window(driver.window_handles[0])
         time.sleep(0.5)
+
+        if len(figure['jan_code']) < 1:
+            continue
 
         df = pd.concat([df, pd.DataFrame([figure])], ignore_index=True)
     return df

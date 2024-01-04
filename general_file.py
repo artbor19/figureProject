@@ -110,10 +110,14 @@ def amiami_lookup(jan):
 
 #amiami_lookup('4595123918180')
 
-def parse_all_page(driver, df):
+def parse_new_page(driver, df):
     matching_params = driver.find_element(By.CLASS_NAME, 'new-items__inner')
     figure_general_box = matching_params.find_elements(By.CLASS_NAME, 'newly-added-items__item.nomore')
     for f in figure_general_box:
+
+        figure_name = f.find_element(By.CLASS_NAME, 'newly-added-items__item__name')
+        if 'Game-prize' in figure_name.text:
+            continue
 
         figure = {
             'jan_code': None,
@@ -173,24 +177,134 @@ def new_listing_table():
     assert "AmiAmi" in driver.title
     time.sleep(2)
 
-    figure_df = pd.DataFrame()
+    new_figure_df = pd.DataFrame()
 
-    figure_df = parse_all_page(driver, figure_df)
+    new_figure_df = parse_new_page(driver, new_figure_df)
     time.sleep(3)
-    # for i in range(4):
-    # nextPage = driver.find_element(By.CLASS_NAME, 'pager__next')
-    # nextPage.click()
-    # time.sleep(3)
-    # figure_df = parse_all_page(driver, figure_df)
-    display(figure_df)
+    for i in range(4):
+        nextPage = driver.find_element(By.CLASS_NAME, 'pager__next')
+        nextPage.click()
+        time.sleep(3)
+        new_figure_df = parse_new_page(driver, new_figure_df)
+    display(new_figure_df)
     driver.close()
 
-    #Configured to Artur's local machine, must be modified (Server) to work with local machine on trusted connection i.e. localhost
     params = urllib.parse.quote_plus(
         "DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-QLGCSG7;DATABASE=figure_tracker;Trusted_Connection=yes;Encrypt=no;")
     engine = create_engine('mssql+pyodbc:///?odbc_connect={}'.format(params))
-    figure_df.to_sql('NewListings', engine, if_exists='append', index=False)
+    new_figure_df.to_sql('NewListings', engine, if_exists='append', index=False)
+
+# new_listing_table()
+
+def parse_used_page(driver, df):
+    matching_params = driver.find_element(By.CLASS_NAME, 'new-items__inner')
+    figure_general_box = matching_params.find_elements(By.CLASS_NAME, 'newly-added-items__item.nomore')
+    for f in figure_general_box:
+
+        figure_name = f.find_element(By.CLASS_NAME, 'newly-added-items__item__name')
+        if 'Game-prize' in figure_name.text:
+            continue
+
+        figure = {
+            'jan_code': None,
+            'store_id ': 1,
+            'currency_code': None,
+            'price': 0,
+            'is_available': 1,
+            'is_limited_edition': 0,
+            'condition': None,
+            'url': None
+        }
+
+        limited_check = f.find_element(By.CLASS_NAME,
+                                       'newly-added-items__item__tag-list__line.newly-added-items__item__tag-list__line_limited')
+        if 'Limited' in limited_check.text:
+            figure['is_limited_edition'] = 1
+
+        currency_check = f.find_element(By.CLASS_NAME, 'newly-added-items__item__price_state_currency')
+        figure['currency_code'] = currency_check.text
+
+        url_check = f.find_element(By.TAG_NAME, 'a')
+        figure['url'] = url_check.get_attribute('href')
+
+        driver.execute_script("window.open('');")
+        driver.switch_to.window(driver.window_handles[1])
+        time.sleep(0.5)
+        driver.get(figure['url'])
+        time.sleep(3)
+
+        jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
+        figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
+        about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
+
+        figure['condition'] = 'Item:' + \
+                              driver.find_element(By.CLASS_NAME, 'item-detail__section-title').text.split(')')[0].split(
+                                  '/')[0].split(':')[1]
+
+        for a in about_all:
+            if 'JAN code' in a.text:
+                figure['jan_code'] = a.text.split('JAN code')[1].strip()
+
+        try:
+            more_choices = driver.find_element(By.CLASS_NAME, 'buying-choices-contents')
+            other_listings = more_choices.find_elements(By.CLASS_NAME, 'buying-choices-contents__list')
+            for o in other_listings:
+                sub_figure = {
+                    'jan_code': figure['jan_code'],
+                    'store_id ': 1,
+                    'currency_code': figure['currency_code'],
+                    'price': 0,
+                    'is_available': 1,
+                    'is_limited_edition': figure['is_limited_edition'],
+                    'condition': None,
+                    'url': figure['url']
+                }
+
+                other_listing = o.find_element(By.CLASS_NAME, 'buying-choices-contents__list_price').text.split('\n')
+                sub_figure['price'] = float(other_listing[0].replace(',', '').replace('JPY', ''))
+                sub_figure['condition'] = other_listing[1].replace('Condition', '').split('Box')[0].strip()
+
+                df = pd.concat([df, pd.DataFrame([sub_figure])], ignore_index=True)
+        except:
+            None
+
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+        time.sleep(0.5)
+
+        df = pd.concat([df, pd.DataFrame([figure])], ignore_index=True)
+    return df
 
 
-new_listing_table()
+def used_listing_table():
+    usedListingDF = pd.DataFrame()
+
+    driver = webdriver.Chrome()
+    driver.get(
+        "https://www.amiami.com/eng/search/list/?s_condition_flg=1&s_st_condition_flg=1&s_sortkey=preowned&s_cate2=459")
+    time.sleep(2)
+    assert "AmiAmi" in driver.title
+    time.sleep(2)
+
+    used_figure_df = pd.DataFrame()
+
+    used_figure_df = parse_used_page(driver, used_figure_df)
+    time.sleep(3)
+    for i in range(4):
+        nextPage = driver.find_element(By.CLASS_NAME, 'pager__next')
+        nextPage.click()
+        time.sleep(3)
+        used_figure_df = parse_used_page(driver, used_figure_df)
+    display(used_figure_df)
+    driver.close()
+
+    params = urllib.parse.quote_plus(
+        "DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-QLGCSG7;DATABASE=figure_tracker;Trusted_Connection=yes;Encrypt=no;")
+    engine = create_engine('mssql+pyodbc:///?odbc_connect={}'.format(params))
+    used_figure_df.to_sql('PreownedListings', engine, if_exists='append', index=False)
+
+
+used_listing_table()
+
+
 

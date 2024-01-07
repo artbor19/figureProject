@@ -123,7 +123,7 @@ def amiami_lookup(jan):
                                         'newly-added-items__item__tag-list__item.newly-added-items__item__tag-list__item_preowned')
         if 'Pre-owned' in check_preowned.text:
             figure = {
-                'jan_code': None,
+                'jan_code': jan,
                 'store_id ': 1,
                 'currency_code': None,
                 'price': 0,
@@ -159,18 +159,6 @@ def amiami_lookup(jan):
                     driver.get(figure['url'])
                     time.sleep(3)
 
-                    jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
-                    figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
-                    about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
-
-                    figure['condition'] = 'Item:' + \
-                                          driver.find_element(By.CLASS_NAME, 'item-detail__section-title').text.split(
-                                              ')')[0].split('/')[0].split(':')[1]
-
-                    for a in about_all:
-                        if 'JAN code' in a.text:
-                            figure['jan_code'] = a.text.split('JAN code')[1].strip()
-
                     conn = pyodbc.connect(
                         'Driver={SQL Server};' 'Server=DESKTOP-QLGCSG7;' 'Database=figure_tracker;' 'Trusted_Connection=yes;')
                     cursor = conn.cursor()
@@ -179,6 +167,14 @@ def amiami_lookup(jan):
                             figure['jan_code']))
                     cursor.commit()
                     cursor.close()
+
+                    jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
+                    figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
+                    about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
+
+                    figure['condition'] = 'Item:' + \
+                                          driver.find_element(By.CLASS_NAME, 'item-detail__section-title').text.split(
+                                              ')')[0].split('/')[0].split(':')[1]
 
                     try:
                         more_choices = driver.find_element(By.CLASS_NAME, 'buying-choices-contents')
@@ -234,18 +230,6 @@ def amiami_lookup(jan):
                     driver.get(figure['url'])
                     time.sleep(3)
 
-                    jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
-                    figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
-                    about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
-
-                    figure['condition'] = 'Item:' + \
-                                          driver.find_element(By.CLASS_NAME, 'item-detail__section-title').text.split(
-                                              ')')[0].split('/')[0].split(':')[1]
-
-                    for a in about_all:
-                        if 'JAN code' in a.text:
-                            figure['jan_code'] = a.text.split('JAN code')[1].strip()
-
                     conn = pyodbc.connect(
                         'Driver={SQL Server};' 'Server=DESKTOP-QLGCSG7;' 'Database=figure_tracker;' 'Trusted_Connection=yes;')
                     cursor = conn.cursor()
@@ -254,6 +238,14 @@ def amiami_lookup(jan):
                             figure['jan_code']))
                     cursor.commit()
                     cursor.close()
+
+                    jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
+                    figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
+                    about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
+
+                    figure['condition'] = 'Item:' + \
+                                          driver.find_element(By.CLASS_NAME, 'item-detail__section-title').text.split(
+                                              ')')[0].split('/')[0].split(':')[1]
 
                     try:
                         more_choices = driver.find_element(By.CLASS_NAME, 'buying-choices-contents')
@@ -319,10 +311,6 @@ def amiami_lookup(jan):
                                       driver.find_element(By.CLASS_NAME, 'item-detail__section-title').text.split(')')[
                                           0].split('/')[0].split(':')[1]
 
-                for a in about_all:
-                    if 'JAN code' in a.text:
-                        figure['jan_code'] = a.text.split('JAN code')[1].strip()
-
                 try:
                     more_choices = driver.find_element(By.CLASS_NAME, 'buying-choices-contents')
                     other_listings = more_choices.find_elements(By.CLASS_NAME, 'buying-choices-contents__list')
@@ -361,7 +349,7 @@ def amiami_lookup(jan):
         #####
         else:
             figure = {
-                'jan_code': None,
+                'jan_code': jan,
                 'store_id ': 1,
                 'currency_code': None,
                 'price': 0,
@@ -393,10 +381,6 @@ def amiami_lookup(jan):
                     jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
                     figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
                     about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
-
-                    for a in about_all:
-                        if 'JAN code' in a.text:
-                            figure['jan_code'] = a.text.split('JAN code')[1].strip()
 
                     conn = pyodbc.connect(
                         'Driver={SQL Server};' 'Server=DESKTOP-QLGCSG7;' 'Database=figure_tracker;' 'Trusted_Connection=yes;')
@@ -477,10 +461,6 @@ def amiami_lookup(jan):
                 jp_price = driver.find_element(By.CLASS_NAME, 'item-detail__price_selling-price')
                 figure['price'] = float(jp_price.text.replace('JPY', '').replace(',', ''))
                 about_all = driver.find_elements(By.CLASS_NAME, 'item-about__data')
-
-                for a in about_all:
-                    if 'JAN code' in a.text:
-                        figure['jan_code'] = a.text.split('JAN code')[1].strip()
 
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])

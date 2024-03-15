@@ -41,7 +41,7 @@ def get_item_detail_from_list(links: list[str], driver: WebDriver):
 
 def get_item_detail(link: str, driver: WebDriver):
     driver.get(link)
-    figure = FigureDTO()
+    figure = FigureDTO(url=link)
     try:
         try:
             title = driver.find_element(By.XPATH,
@@ -61,8 +61,9 @@ def get_item_detail(link: str, driver: WebDriver):
 
         try:
             figure.character = []
-            character = driver.find_element(By.XPATH, ".//div[contains(text(), 'Character')]//following::span")
-            figure.character.append(character.text)
+            characters = driver.find_elements(By.XPATH, ".//div[contains(text(), 'Character')]//following-sibling::div[contains(@class, 'data-value')]//child::span")
+            for character in characters:
+                figure.character.append(character.text)
             # print(character.text, character.get_attribute("switch"))
         except Exception as ex:
             figure.character = []
@@ -70,8 +71,9 @@ def get_item_detail(link: str, driver: WebDriver):
 
         try:
             figure.company = []
-            company = driver.find_element(By.XPATH, ".//div[contains(text(), 'Compan')]//following::span")
-            figure.company.append(company.text)
+            companies = driver.find_elements(By.XPATH, ".//div[contains(text(), 'Compan')]//following-sibling::div[contains(@class, 'data-value')]//child::span")
+            for company in companies:
+                figure.company.append(company.text)
             # print(company.text, company.get_attribute("switch"))
         except Exception as ex:
             figure.company = []

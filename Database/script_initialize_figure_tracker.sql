@@ -37,6 +37,16 @@ IF EXISTS (SELECT * FROM sysobjects WHERE name = 'Stores' AND xtype = 'U')
 BEGIN
 	DROP TABLE Stores
 END
+
+IF EXISTS (SELECT * FROM sysobjects WHERE name = 'Figure_Companies' AND xtype = 'U')
+BEGIN
+	DROP TABLE Figure_Companies
+END
+
+IF EXISTS (SELECT * FROM sysobjects WHERE name = 'Figure_Characters' AND xtype = 'U')
+BEGIN
+	DROP TABLE Figure_Characters
+END
 ------------------------------------------------------------------------------------------------
 
 
@@ -282,5 +292,43 @@ BEGIN
 	INSERT INTO FigurePriceTracker ([jan_code], [store_id], [check_date], [currency_code], [price])
 		SELECT [jan_code], [store_id], [recent_check_date], [currency_code], [price] FROM inserted
 END
+GO
+------------------------------------------------------------------------------------------------
+
+
+----- Figure_Companies Table -------------------------------------------------------------------
+CREATE TABLE Figure_Companies (
+	[id] INT IDENTITY(1,1) PRIMARY KEY,
+	[jan_code] CHAR(13),
+	[company_name] NVARCHAR(100) NOT NULL,
+	[create_date] DATETIME DEFAULT GETDATE(),
+	[update_date] DATETIME DEFAULT GETDATE(),
+	UNIQUE([jan_code], [company_name])
+)
+GO
+
+CREATE INDEX idx1_Figure_Companies ON Figure_Companies ([jan_code])
+GO
+
+CREATE INDEX idx2_Figure_Companies ON Figure_Companies ([company_name])
+GO
+------------------------------------------------------------------------------------------------
+
+
+----- Figure_Characters Table -------------------------------------------------------------------
+CREATE TABLE Figure_Characters (
+	[id] INT IDENTITY(1,1) PRIMARY KEY,
+	[jan_code] CHAR(13),
+	[character_name] NVARCHAR(100) NOT NULL,
+	[create_date] DATETIME DEFAULT GETDATE(),
+	[update_date] DATETIME DEFAULT GETDATE(),
+	UNIQUE([jan_code], [character_name])
+)
+GO
+
+CREATE INDEX idx1_Figure_Characters ON Figure_Characters ([jan_code])
+GO
+
+CREATE INDEX idx2_Figure_Characters ON Figure_Characters ([character_name])
 GO
 ------------------------------------------------------------------------------------------------
